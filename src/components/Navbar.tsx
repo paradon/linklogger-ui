@@ -8,7 +8,7 @@ function HamburgerIcon() {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
       <path
         stroke="black"
-        stroke-width="2"
+        strokeWidth="2"
         d="M3 5 L17 5 M3 10 L17 10 M3 15 L17 15"
       />
     </svg>
@@ -53,7 +53,7 @@ export default function Navbar({
         }`}
       >
         {items.map((item) => (
-          <li>
+          <li key={item.label}>
             <NavLink
               className={({ isActive }) =>
                 isActive ? styles.navLinkActive : undefined
