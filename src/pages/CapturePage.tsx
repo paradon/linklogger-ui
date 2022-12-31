@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 import styles from './CapturePage.module.css';
 
 function InputField({
@@ -123,14 +124,22 @@ export default function CapturePage() {
     console.log(`URL: ${url}`);
     console.log(`Notes: ${notes}`);
     setSavingStatus({ type: 'saving' });
-    await new Promise((r) => setTimeout(r, 2000));
-    setSavingStatus({
-      type: 'error',
-      msg: 'This is a test of a somewhat long error message to see how it flows in the form.',
-    });
+
+    try {
+      await axios.post('/api/capture', { title, url, notes });
+      setSavingStatus({ type: 'success' });
+    } catch (error) {
+      setSavingStatus({
+        type: 'error',
+        msg: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 
   function clear() {
+    setTitle('');
+    setUrl('');
+    setNotes('');
     setSavingStatus({ type: 'new' });
   }
 
