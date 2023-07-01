@@ -81,9 +81,9 @@ function Spinner() {
 
 function Saving() {
   return (
-    <p>
+    <div>
       <Spinner /> Saving...
-    </p>
+    </div>
   );
 }
 
