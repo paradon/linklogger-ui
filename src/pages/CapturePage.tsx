@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, Dispatch } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import styles from './CapturePage.module.css';
@@ -108,12 +108,51 @@ function Status({ status }: { status: SavingStatus }) {
   }
 }
 
+function Targets({
+  target,
+  setTarget,
+}: {
+  target: string;
+  setTarget: Dispatch<string>;
+}) {
+  const [options, setOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch('/api/targets')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            `This is an HTTP error: The status is ${response.status}`,
+          );
+        }
+        return response.json();
+      })
+      .then((actualData) => setOptions(actualData))
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }, []);
+
+  return (
+    <select value={target} onChange={(e) => setTarget(e.target.value)}>
+      {options.map((x) => (
+        <option value={x} key={x}>
+          {x}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export default function CapturePage() {
   const [searchParams] = useSearchParams();
 
-  const [title, setTitle] = useState(searchParams.get('title') || '');
-  const [url, setUrl] = useState(searchParams.get('url') || '');
-  const [notes, setNotes] = useState(searchParams.get('notes') || '');
+  const [title, setTitle] = useState<string>(searchParams.get('title') || '');
+  const [url, setUrl] = useState<string>(searchParams.get('url') || '');
+  const [notes, setNotes] = useState<string>(searchParams.get('notes') || '');
+  const [target, setTarget] = useState<string>(
+    searchParams.get('target') || '',
+  );
 
   const [savingStatus, setSavingStatus] = useState<SavingStatus>({
     type: 'new',
@@ -126,7 +165,7 @@ export default function CapturePage() {
     setSavingStatus({ type: 'saving' });
 
     try {
-      await axios.post('/api/capture', { title, url, notes });
+      await axios.post('/api/capture', { title, url, notes, target });
       setSavingStatus({ type: 'success' });
     } catch (error) {
       setSavingStatus({
@@ -140,6 +179,7 @@ export default function CapturePage() {
     setTitle('');
     setUrl('');
     setNotes('');
+    setTarget('');
     setSavingStatus({ type: 'new' });
   }
 
@@ -166,6 +206,7 @@ export default function CapturePage() {
         onChange={(x) => setNotes(x)}
         locked={isSaving()}
       />
+      <Targets target={target} setTarget={setTarget} />
       <div>
         <Button label="Submit" onClick={submit} locked={isSaving()} />
         <Button label="Clear" onClick={clear} locked={isSaving()} />
